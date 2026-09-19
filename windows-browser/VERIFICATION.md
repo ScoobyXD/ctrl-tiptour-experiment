@@ -1,11 +1,11 @@
 # Hybrid verification - September 19, 2026
 
-- **389 offline Python tests pass**, including the inherited executor, browser ownership and delayed cleanup, hybrid factory, exact supplied-text boundary, stale terminal evidence, finite target/none mapping, cancellation, and malformed provider responses.
+- **413 offline Python tests pass**, including the inherited executor, browser ownership and delayed cleanup, hybrid factory, exact supplied-text boundary, stale terminal evidence, finite target/none mapping, cancellation, and malformed provider responses.
 - Ruff and source/wheel builds pass. Native Windows debugger and emergency-panel synthetic tests pass, including minimum layouts, public planner summaries, correct model attribution for planner terminals, all Jev probability options, and independent Stop/hotkey routing. They use stub actions and do not control Chrome.
 - **Real planner API compatibility passed** with Gemini 3.1 Pro via OpenRouter on a supplied synthetic observation. It returned validated structured DONE evidence in 5.88 seconds. No browser was involved.
 - **Real planner plus real Jev compatibility passed** on a supplied synthetic catalog observation. Gemini proposed typing the search term; Jev selected the observed field and exact `trail` payload. Combined elapsed time was 4.44 seconds. No browser input was sent.
 - **Actual runtime isolation passed**: hybrid served its own authenticated API at port 8767 and remained idle. It could not acquire Chrome while baseline held the process-lifetime lease. Its actual Stop script shut down only hybrid; baseline at port 8766 stayed idle and running.
-- **No live hybrid browser task has passed yet.** The baseline's corrected input-readiness retest still awaits Chrome's renewed native Allow approval. Earlier baseline catalog and 12-message successes do not prove hybrid reliability. Baseline's 100-message test failed before the new readiness fix.
+- **No live hybrid browser task has passed yet.** The baseline's input-readiness retest failed after approval because Chrome remained hidden. Both experiments now include explicit navigation activation and a native Run-click foreground handoff; the reloaded baseline awaits Chrome's renewed native Allow approval for another live check. Earlier baseline catalog and 12-message successes do not prove hybrid reliability. Baseline's 100-message test failed before the new readiness fix.
 
 The native chooser opens either independent installation. This remains an experimental feature branch, separate from baseline main. The original TipTour macOS application was inspected but not built or launched on Windows.
 

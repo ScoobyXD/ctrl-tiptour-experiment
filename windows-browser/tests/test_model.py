@@ -433,6 +433,18 @@ def test_only_task_host_tabs_are_offered_even_if_title_claims_relevance(monkeypa
     assert model.choose(state, "Open Gmail", [])["choice"] == "switch_tab:gmail"
 
 
+def test_bootstrap_never_offers_or_accepts_done_but_keeps_user_handoffs(monkeypatch):
+    def post(_url, _key, body):
+        options = body["questions"]["operation"]["criteria"]
+        assert "DONE" not in options
+        assert {"BLOCKED", "NEEDS_INPUT", "OPEN_URL"} <= options.keys()
+        return {"answers": {"operation": choice(options, "DONE")}}
+
+    monkeypatch.setattr(model, "post_json", post)
+    with pytest.raises(model.DecisionAuditError):
+        model.choose(bootstrap_page(), "Open Gmail", [])
+
+
 def test_outside_scope_page_stops_before_paid_request(monkeypatch):
     state = bootstrap_page()
     state["bootstrap"] = False
