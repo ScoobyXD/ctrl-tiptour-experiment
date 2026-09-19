@@ -129,9 +129,14 @@
   "source_and_wheel_build": "passed",
   "live_browser_task": "not verified; baseline corrected input retest waiting for native Chrome Allow",
   "latest_offline_verification": {
-    "python_tests_passed": 413,
+    "python_tests_passed": 421,
     "ruff": "passed",
     "native_debugger": "synthetic foreground handoff and repeated-launch restore tests passed",
-    "live_hybrid_browser_pass": false
+    "live_hybrid_browser_pass": false,
+    "shutdown_regressions": {
+      "passed": 8,
+      "copied_script_only": true,
+      "real_installed_app_stopped_by_tests": false
+    }
   }
 }
