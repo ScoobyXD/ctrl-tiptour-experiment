@@ -1,0 +1,131 @@
+{
+  "planner_only": {
+    "check": "synthetic planner compatibility; no browser task",
+    "passed": true,
+    "decision_source": "planner",
+    "operation": "DONE",
+    "planner": {
+      "model": "google/gemini-3.1-pro-preview",
+      "call_count": 1,
+      "max_calls": 64,
+      "current": {
+        "status": "done",
+        "next_subgoal": "",
+        "progress_summary": "Observed the exact text 'HYBRID CHECK OK' on the page.",
+        "completion_evidence": "The text 'HYBRID CHECK OK' is visible on the page."
+      },
+      "trace": [
+        {
+          "sequence": 1,
+          "model": "google/gemini-3.1-pro-preview",
+          "reason": "first_step",
+          "action_count": 0,
+          "status": "done",
+          "request_bytes": 3465,
+          "latency_ms": 5882,
+          "jev_terminal": null,
+          "next_subgoal": "",
+          "progress_summary": "Observed the exact text 'HYBRID CHECK OK' on the page.",
+          "completion_evidence": "The text 'HYBRID CHECK OK' is visible on the page."
+        }
+      ]
+    },
+    "elapsed_seconds": 5.88
+  },
+  "planner_and_jev": {
+    "check": "real planner plus real Jev on synthetic supplied page; no browser execution",
+    "passed": true,
+    "operation": "TYPE_TEXT",
+    "action_id": "e1",
+    "exact_text": "trail",
+    "jev_model": "typesafe/jev-1.13-20260917",
+    "planner": {
+      "model": "google/gemini-3.1-pro-preview",
+      "call_count": 1,
+      "max_calls": 64,
+      "current": {
+        "status": "continue",
+        "next_subgoal": "Type the search term into the catalog search field.",
+        "progress_summary": "I am on the catalog search page. I need to enter the search term 'trail' and submit.",
+        "completion_evidence": ""
+      },
+      "trace": [
+        {
+          "sequence": 1,
+          "model": "google/gemini-3.1-pro-preview",
+          "reason": "first_step",
+          "action_count": 0,
+          "status": "continue",
+          "request_bytes": 3607,
+          "latency_ms": 4247,
+          "jev_terminal": null,
+          "next_subgoal": "Type the search term into the catalog search field.",
+          "progress_summary": "I am on the catalog search page. I need to enter the search term 'trail' and submit.",
+          "completion_evidence": ""
+        }
+      ]
+    },
+    "elapsed_seconds": 4.44
+  },
+  "runtime_isolation": {
+    "8766": {
+      "health": {
+        "app": "[CTRL]",
+        "status": "ok",
+        "model": "typesafe/jev-1.13"
+      },
+      "status": "idle",
+      "busy": false,
+      "history_count": 0,
+      "browser": {
+        "state": "waiting_for_approval",
+        "status": "waiting_for_approval",
+        "connected": false,
+        "message": "If Chrome asks to allow remote debugging, approve its native prompt.",
+        "browser": "Google Chrome",
+        "version": null
+      },
+      "credentials_status": "ready"
+    },
+    "8767": {
+      "health": {
+        "app": "[CTRL]",
+        "experiment": "hybrid",
+        "status": "ok",
+        "model": "typesafe/jev-1.13"
+      },
+      "status": "idle",
+      "busy": false,
+      "history_count": 0,
+      "browser": {
+        "state": "owned_by_other_experiment",
+        "status": "owned_by_other_experiment",
+        "connected": false,
+        "message": "Another CTRL experiment owns Chrome. Stop that app, then click Connect Chrome here. The experiments never control your browser simultaneously.",
+        "browser": "Google Chrome",
+        "version": null
+      },
+      "credentials_status": "ready"
+    }
+  },
+  "independent_stop": {
+    "hybrid_backend_stopped": true,
+    "baseline_backend_preserved": true,
+    "baseline_status": "idle",
+    "baseline_browser_state": "waiting_for_approval",
+    "browser_tasks_submitted": 0
+  },
+  "date": "2026-09-19",
+  "offline_python_tests": 389,
+  "native_synthetic_tests": {
+    "planner_public_fields": true,
+    "planner_terminal_source_label": true,
+    "all_jev_options": true,
+    "minimum_layout": true,
+    "cancel_restart": true,
+    "stop_hotkey_registered": true
+  },
+  "ruff": "passed",
+  "source_and_wheel_build": "passed",
+  "live_browser_task": "not verified; baseline corrected input retest waiting for native Chrome Allow"
+}

@@ -1,0 +1,182 @@
+"""Controller lifecycle regressions; no real browser, account, or network access."""
+
+import threading
+from types import SimpleNamespace
+
+import pytest
+
+from ctrl.credentials import CredentialError
+from ctrl.server import Controller
+
+
+class StubAgent:
+    def __init__(self, status="predicted"):
+        self.browser = SimpleNamespace(target="chosen-tab")
+        self.state = {
+            "status": status,
+            "goal": "Existing task",
+            "page": {"fingerprint": "page-1", "actions": []},
+            "history": [],
+            "decision": {"fingerprint": "page-1", "operation": "CLICK", "choice": "e1"},
+        }
+        self.closed = False
+
+    def snapshot(self):
+        return dict(self.state)
+
+    def trace_state(self):
+        return {"trace_summaries": [], "latest_trace_id": None}
+
+    def finish_trace(self, *_args):
+        pass
+
+    def close(self):
+        self.closed = True
+
+
+@pytest.fixture
+def control(monkeypatch):
+    from ctrl import server
+
+    monkeypatch.setattr(server.browser_connection, "status", lambda: {"connected": False, "status": "disconnected"})
+    return Controller()
+
+
+def test_idle_pause_discards_previously_chosen_action(control):
+    control.agent = StubAgent()
+    control.capture()
+    snapshot = control.pause()
+    assert snapshot["status"] == "paused"
+    assert snapshot["decision"] is None
+    assert control.agent.state["status"] == "paused"
+    assert control.agent.state["decision"] is None
+
+
+def test_credential_failure_publishes_agent_error_instead_of_old_prediction(control):
+    control.agent = StubAgent()
+    control.capture()
+
+    def command(*_args):
+        control.agent.state.update(status="error", decision=None)
+        raise CredentialError("AWS sign-in expired. Run: aws sso login --profile test")
+
+    control.agent.command = command
+    control.work("step", {})
+    snapshot = control.state()
+    assert snapshot["status"] == "error"
+    assert snapshot["decision"] is None
+    assert snapshot["credentials"]["status"] == "error"
+    assert snapshot["error"].startswith("AWS sign-in expired")
+
+
+def test_failed_attach_does_not_leave_previous_executable_decision(control, monkeypatch):
+    from hybrid import agent
+
+    previous = StubAgent()
+    control.agent = previous
+    control.capture()
+
+    def missing_tab(*_args, **_kwargs):
+        raise RuntimeError("The chosen Chrome tab is no longer available.")
+
+    monkeypatch.setattr(agent, "HybridAgent", missing_tab)
+    control.work("start", {"goal": "A new task", "target_id": "closed-tab", "values": []})
+    snapshot = control.state()
+    assert previous.closed
+    assert control.agent is None
+    assert snapshot["status"] == "error"
+    assert snapshot["decision"] is None
+    assert snapshot["error"] == "The chosen Chrome tab is no longer available."
+
+
+def test_credential_worker_blocks_second_operation_but_pause_is_immediate(control, monkeypatch):
+    from ctrl import server
+
+    entered = threading.Event()
+    release = threading.Event()
+
+    def diagnostics():
+        entered.set()
+        assert release.wait(timeout=2)
+        return {"status": "ready", "message": "Jev connected"}
+
+    monkeypatch.setattr(server, "check_openrouter", diagnostics)
+    control.submit("credentials", {})
+    try:
+        assert entered.wait(timeout=1)
+        with pytest.raises(RuntimeError, match="already in progress"):
+            control.submit("connect", {})
+        result = control.pause()
+        assert control.cancel.is_set()
+        assert result["running"] is False
+        assert result["busy"] is True
+    finally:
+        release.set()
+        control.worker.join(timeout=2)
+    assert control.credentials["status"] == "ready"
+    assert control.busy is False
+
+
+def test_unexpected_sdk_error_does_not_reveal_response_or_credentials(control, monkeypatch):
+    from ctrl import server
+
+    class ProviderError(Exception):
+        pass
+
+    def broken_check():
+        raise ProviderError("Authorization: Bearer sk-or-SECRET-do-not-expose")
+
+    monkeypatch.setattr(server, "check_openrouter", broken_check)
+    control.work("credentials", {})
+    snapshot = control.state()
+    assert "sk-or-SECRET" not in str(snapshot)
+    assert "No browser action was automatically retried" in snapshot["error"]
+    assert snapshot["credentials"]["status"] == "error"
+    assert snapshot["busy"] is False
+
+
+def test_stale_manual_preview_refreshes_without_replaying(control):
+    from unittest.mock import Mock
+
+    from jev_ultrafast.browser import StalePage
+
+    control.agent = StubAgent()
+    control.agent.screenshots = False
+    fresh = {"fingerprint": "page-2", "actions": []}
+    control.agent.browser.observe = Mock(return_value=fresh)
+    control.agent.command = Mock(side_effect=StalePage("Tab changed"))
+    control.capture()
+    control.work("act", {"fingerprint": "page-1"})
+    state = control.state()
+    assert state["status"] == "ready"
+    assert state["decision"] is None
+    assert state["page"]["fingerprint"] == "page-2"
+    assert state["error"] is None
+    control.agent.command.assert_called_once_with("act", {"fingerprint": "page-1"})
+
+
+def test_controller_shutdown_cleanup_is_idempotent(control):
+    from unittest.mock import Mock
+
+    control.agent = StubAgent()
+    control.agent.close = Mock()
+    control.close()
+    control.close()
+    control.agent.close.assert_called_once()
+    assert control.shutdown.is_set()
+
+
+def test_private_freshness_data_never_reaches_local_debugger(control):
+    import json
+
+    control.agent = StubAgent()
+    control.agent.state["page"].update(
+        page_key=["OFFSCREEN-PRIVATE-VALUE"], marker=["INTERNAL-MARKER"], guards={"1": "PRIVATE-GUARD"},
+        text="Visible page", title="Public title",
+    )
+    control.capture()
+    public = control.state()["page"]
+    assert public["fingerprint"] == "page-1" and public["text"] == "Visible page"
+    assert not {"page_key", "marker", "guards"} & public.keys()
+    assert "PRIVATE" not in json.dumps(control.state())
+    assert control.agent.state["page"]["page_key"] == ["OFFSCREEN-PRIVATE-VALUE"]

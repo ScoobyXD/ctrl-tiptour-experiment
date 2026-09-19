@@ -1,3 +1,11 @@
+# Isolated Windows browser experiment
+
+This private experiment retains the original TipTour macOS source below and adds a separate [Windows browser adaptation](windows-browser/README.md). It uses an OpenRouter reasoning planner plus Jev, with a native debugger and an independent environment. The planner-plus-Jev integration is new experimental code; it is not a feature of the original macOS app.
+
+Run `windows-browser/Start CTRL.cmd` on Windows. Read [current verification](windows-browser/VERIFICATION.md) before treating it as proven. The baseline CTRL repository is independent; this experiment is not merged into its main branch.
+
+---
+
 <div align="center">
 
 <img src="gemnew.png" alt="TipTour cursor actions" width="900" />

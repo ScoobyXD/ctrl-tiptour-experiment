@@ -112,3 +112,10 @@ When you make changes to this project that affect the information in this file, 
 6. **Line count drift**: If a file's line count changes significantly (>50 lines), update the approximate count in the Key Files table
 
 Do NOT update this file for minor edits, bug fixes, or changes that don't affect the documented architecture or conventions.
+
+
+## Separate Windows experiment
+
+The user explicitly requested a separate Windows browser experiment on September 19, 2026. It lives only in `windows-browser/` under its own AGENTS.md and independent Python environment. This is a browser adaptation using an OpenRouter planner plus Jev; it does not replace or build the macOS application. Keep upstream Swift source and the existing baseline CTRL repository separate.
+
+Key files: `windows-browser/hybrid/decider.py` (bounded hybrid loop, approximately 240 lines), `windows-browser/hybrid/planner.py` (structured OpenRouter adapter, approximately 140 lines), `windows-browser/hybrid/grounding.py` (finite target/none port, approximately 40 lines), and `windows-browser/scripts/DebugConsole.cs` (native Windows task and evidence window). Source provenance is in UPSTREAM_REVISION and windows-browser/FOUNDATION.md. Build and test commands are in the Windows README; Xcode rules apply to the original macOS app only.
