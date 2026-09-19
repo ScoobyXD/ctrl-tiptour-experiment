@@ -1,5 +1,11 @@
 # Hybrid verification - September 19, 2026
 
+## Native launcher correction
+
+The actual custom hybrid debugger opened in 2.30 seconds through the exact production chooser launch function. Windows reported a visible, responding native window. The earlier launch defect came from requesting Hidden startup windows; it was missed by callback-only rendering tests. Interactive GUI children now use CreateNoWindow plus Normal window visibility, startup waits for an actual visible debugger/panel, and errors are surfaced. Three launch regressions passed, including real disposable-window startup/repeat/failure tests. Evidence is in [docs/native-launch-verification.json](docs/native-launch-verification.json). No browser task or backend restart was part of this verification.
+
+The product UI now calls this a custom Windows hybrid experiment. It does not claim to be the TipTour macOS application or a complete port.
+
 - **421 offline Python tests pass (413 in the full core run plus eight isolated shutdown regressions)**, including the inherited executor, browser ownership and delayed cleanup, hybrid factory, exact supplied-text boundary, stale terminal evidence, finite target/none mapping, cancellation, and malformed provider responses.
 - Ruff and source/wheel builds pass. Native Windows debugger and emergency-panel synthetic tests pass, including minimum layouts, public planner summaries, correct model attribution for planner terminals, all Jev probability options, and independent Stop/hotkey routing. They use stub actions and do not control Chrome.
 - **Real planner API compatibility passed** with Gemini 3.1 Pro via OpenRouter on a supplied synthetic observation. It returned validated structured DONE evidence in 5.88 seconds. No browser was involved.

@@ -7,3 +7,5 @@ No virtual environment, credential, task state, history, or browser connection w
 The original Swift macOS application remains in the parent source tree and cannot be built or run on Windows. The planner-plus-Jev orchestration is new experimental code; it is not an existing TipTour feature.
 
 Reviewed browser readiness, shared lease, and delayed transport cleanup fixes were copied independently from CTRL `ba1e8b8169058d04890c1ca86db156ecb010b4ed`. This experiment uses its own copies; no runtime imports refer to the baseline checkout. Hybrid orchestration, server factory, native UI, ports, and model configuration are separate changes.
+
+Later independently copied fixes include generation-bound Chrome PID metadata, explicit navigation activation and bootstrap completion rejection, native Run-click foreground permission, verified graceful shutdown with stale-PID protection, and the native-window launch correction. The latter follows baseline commits 025def6, c32cbb1, and 1edfe58; the hybrid keeps its own scripts, native sources, tests, ports, and runtime files.
