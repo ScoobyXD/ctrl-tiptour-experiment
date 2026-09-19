@@ -446,7 +446,7 @@ def make_server(port=8767, controller=None):
 
 def main():
     parser = argparse.ArgumentParser(description="Run [CTRL] locally beside your normal Chrome.")
-    parser.add_argument("--port", type=int, default=int(os.environ.get("CTRL_PORT", "8767")))
+    parser.add_argument("--port", type=int, default=8767)
     args = parser.parse_args()
     if not 1024 <= args.port <= 65535:
         parser.error("Use a port between 1024 and 65535")
